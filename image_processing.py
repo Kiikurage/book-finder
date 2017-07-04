@@ -10,19 +10,16 @@ def main():
     parser = argparse.ArgumentParser(description='detect book from target image')
     parser.add_argument('book_image', type=str, help='path to the image of book')
     parser.add_argument('bookshelf_image', type=str, help='path to the image of bookshelf')
-
+    parser.add_argument('dst_image', type=str, help='path to the destination image')
     args = parser.parse_args()
-    print(args.book_image, args.bookshelf_image)
 
     book_img = cv2.imread(args.book_image, 1)
     target_img = cv2.imread(args.bookshelf_image, 1)
 
     mask_img, masked_target_img = color_detect(book_img, target_img)
-
-    #masked_target_img = line_detect2(book_img, target_img, masked_target_img)
     masked_target_img, coord_list = line_detect(book_img, target_img, masked_target_img)
-    sorted_index = np.argsort(coord_list[:, 0], axis=0)
 
+    sorted_index = np.argsort(coord_list[:, 0], axis=0)
     var_max = 0
     index1 = index2 = None
     indexes = None
@@ -43,12 +40,9 @@ def main():
 
     masked_target_img = target_img * mask3d
     segmented_img = segmentation(target_img)
-    print(segmented_img.shape)
-    #print(masked_target_img.dtype)
 
     mask = np.zeros(segmented_img.shape).astype(np.uint8)
     mask[:, coord_list[index2][0]:coord_list[index1][0]] = np.ones(mask[:, coord_list[index2][0]:coord_list[index1][0]].shape).astype(np.uint8)
-    print(mask.shape)
     masked_segmented_img = segmented_img * mask
 
     height = len(target_img)
@@ -68,7 +62,7 @@ def main():
     cv2.imshow("segmented_image", resized_dst2)
 
     cv2.waitKey(0)
-    #cv2.imwrite("target5.jpg", resized_origin)
+    cv2.imwrite(args.dst_image, resized_origin)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
