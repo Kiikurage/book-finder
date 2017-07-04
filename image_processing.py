@@ -2,13 +2,15 @@
 import numpy as np
 import cv2
 from color_detect import color_detect
-from line_detect import line_detect
+from line_detect import line_detect, line_detect2
+from segmentation import segmentation
 
 def main():
     book_img = cv2.imread('./images/0.jpg', 1)
-    target_img = cv2.imread('./images/target5.jpg', 1)
+    target_img = cv2.imread('./images/target.jpg', 1)
 
     mask_img, masked_target_img = color_detect(book_img, target_img)
+    #masked_target_img = line_detect2(book_img, target_img, masked_target_img)
     masked_target_img, coord_list = line_detect(book_img, target_img, masked_target_img)
     sorted_index = np.argsort(coord_list[:, 0], axis=0)
 
@@ -27,18 +29,30 @@ def main():
                 indexes = (index1, index2)
 
     index1, index2 = indexes
-    mask = np.zeros(target_img.shape).astype(np.uint8)
-    mask[:, coord_list[index2][0]:coord_list[index1][0], :] = np.ones(mask[:, coord_list[index2][0]:coord_list[index1][0], :].shape).astype(np.uint8)
+    mask3d = np.zeros(target_img.shape).astype(np.uint8)
+    mask3d[:, coord_list[index2][0]:coord_list[index1][0], :] = np.ones(mask3d[:, coord_list[index2][0]:coord_list[index1][0], :].shape).astype(np.uint8)
 
-    masked_target_img = target_img * mask
+    masked_target_img = target_img * mask3d
+    segmented_img = segmentation(target_img)
+    print(segmented_img.shape)
+    #print(masked_target_img.dtype)
+
+    mask = np.zeros(segmented_img.shape).astype(np.uint8)
+    mask[:, coord_list[index2][0]:coord_list[index1][0]] = np.ones(mask[:, coord_list[index2][0]:coord_list[index1][0]].shape).astype(np.uint8)
+    print(mask.shape)
+    masked_segmented_img = segmented_img * mask
+
 
     #画像の表示
     resized_origin = cv2.resize(masked_target_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
     resized_dst = cv2.resize(mask_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
+    resized_dst2 = cv2.resize(masked_segmented_img, (int(masked_segmented_img.shape[0]/3), int(masked_segmented_img.shape[1]/3)))
     cv2.namedWindow("original_image", cv2.WINDOW_NORMAL)
     cv2.namedWindow("mask_image", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("segmented_image", cv2.WINDOW_NORMAL)
     cv2.imshow("original_image", resized_origin)
     cv2.imshow("mask_image", resized_dst)
+    cv2.imshow("segmented_image", resized_dst2)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
