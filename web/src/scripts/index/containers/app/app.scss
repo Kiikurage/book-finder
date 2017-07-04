@@ -1,0 +1,89 @@
+@import "../../../common/stylus/bootstrap";
+@import "../../../common/stylus/reset";
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: #eceff1;
+}
+
+.App {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-Header {
+  position: relative;
+  flex: 0 auto;
+  height: 64px;
+}
+
+.App-Main {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  flex: 1 1;
+}
+
+%App-View {
+  background: #eceff1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+}
+
+.App-SearchView {
+  @extend %App-View;
+}
+
+.App-PhotoView {
+  @extend %App-View;
+  will-change: transform;
+  transform: translateY(100%);
+
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(#000, 0.3);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1;
+}
+
+.App-PhotoView-Show {
+  animation: App-PhotoView-SlideIn 300ms ease-out;
+  transform: translateY(0%);
+}
+
+@keyframes App-PhotoView-SlideIn {
+  0% {
+    transform: translateY(100%);
+  }
+
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+@keyframes App-PhotoView-SlideOut {
+  0% {
+    transform: translateY(0%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}

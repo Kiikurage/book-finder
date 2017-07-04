@@ -1,10 +1,13 @@
-#coding: utf-8
-import numpy as np
+# coding: utf-8
+import argparse
+import os
+
 import cv2
+import numpy as np
 from color_detect import color_detect
 from line_detect import line_detect, line_detect2
 from segmentation import segmentation
-import argparse
+
 
 def main():
     parser = argparse.ArgumentParser(description='detect book from target image')
@@ -36,25 +39,30 @@ def main():
 
     index1, index2 = indexes
     mask3d = np.zeros(target_img.shape).astype(np.uint8)
-    mask3d[:, coord_list[index2][0]:coord_list[index1][0], :] = np.ones(mask3d[:, coord_list[index2][0]:coord_list[index1][0], :].shape).astype(np.uint8)
+    mask3d[:, coord_list[index2][0]:coord_list[index1][0], :] = np.ones(
+        mask3d[:, coord_list[index2][0]:coord_list[index1][0], :].shape).astype(np.uint8)
 
     masked_target_img = target_img * mask3d
     segmented_img = segmentation(target_img)
 
     mask = np.zeros(segmented_img.shape).astype(np.uint8)
-    mask[:, coord_list[index2][0]:coord_list[index1][0]] = np.ones(mask[:, coord_list[index2][0]:coord_list[index1][0]].shape).astype(np.uint8)
+    mask[:, coord_list[index2][0]:coord_list[index1][0]] = np.ones(
+        mask[:, coord_list[index2][0]:coord_list[index1][0]].shape).astype(np.uint8)
     masked_segmented_img = segmented_img * mask
 
     height = len(target_img)
     width = len(target_img[0])
     buf = 50
-    target_img = cv2.rectangle(target_img, (coord_list[index2][0], buf), (coord_list[index1][0], height - buf), (0, 0, 255), 20)
+    target_img = cv2.rectangle(target_img, (coord_list[index2][0], buf), (coord_list[index1][0], height - buf),
+                               (0, 0, 255), 20)
 
-    #画像の表示
-    resized_origin = cv2.resize(target_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
-    resized_dst = cv2.resize(mask_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
-    resized_dst2 = cv2.resize(masked_segmented_img, (int(masked_segmented_img.shape[0]/3), int(masked_segmented_img.shape[1]/3)))
+    # 画像の表示
+    resized_origin = cv2.resize(target_img, (int(mask_img.shape[0] / 3), int(mask_img.shape[1] / 3)))
+    resized_dst = cv2.resize(mask_img, (int(mask_img.shape[0] / 3), int(mask_img.shape[1] / 3)))
+    resized_dst2 = cv2.resize(masked_segmented_img,
+                              (int(masked_segmented_img.shape[0] / 3), int(masked_segmented_img.shape[1] / 3)))
 
+    os.makedirs(os.path.dirname(args.dst_image), exist_ok=True)
     cv2.imwrite(args.dst_image, resized_origin)
 
     """
@@ -67,6 +75,7 @@ def main():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     """
+
 
 if __name__ == "__main__":
     main()

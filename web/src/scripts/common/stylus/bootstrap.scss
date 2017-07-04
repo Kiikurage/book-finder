@@ -1,0 +1,31 @@
+@import "bootstrap-custom";
+
+html {
+  font-size: $font-size-root;
+}
+
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+@import "~bootstrap/scss/normalize";
+@import "~bootstrap/scss/print";
+
+@import "~bootstrap/scss/reboot";
+@import "~bootstrap/scss/type";
+@import "~bootstrap/scss/code";
+pre {
+  margin-bottom: 0;
+}
+
+code {
+  margin-left: 0.25em;
+  margin-right: 0.25em;
+}
+
+@import "~bootstrap/scss/grid";
+@import "~bootstrap/scss/tables";
+@import "~bootstrap/scss/forms";
+@import "~bootstrap/scss/buttons";
+.btn {
+  cursor: pointer;
+}
