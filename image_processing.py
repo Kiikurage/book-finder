@@ -54,16 +54,19 @@ def main():
     resized_origin = cv2.resize(target_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
     resized_dst = cv2.resize(mask_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
     resized_dst2 = cv2.resize(masked_segmented_img, (int(masked_segmented_img.shape[0]/3), int(masked_segmented_img.shape[1]/3)))
+
+    cv2.imwrite(args.dst_image, resized_origin)
+
+    """
     cv2.namedWindow("original_image", cv2.WINDOW_NORMAL)
     cv2.namedWindow("mask_image", cv2.WINDOW_NORMAL)
     cv2.namedWindow("segmented_image", cv2.WINDOW_NORMAL)
     cv2.imshow("original_image", resized_origin)
     cv2.imshow("mask_image", resized_dst)
     cv2.imshow("segmented_image", resized_dst2)
-
     cv2.waitKey(0)
-    cv2.imwrite(args.dst_image, resized_origin)
     cv2.destroyAllWindows()
+    """
 
 if __name__ == "__main__":
     main()
