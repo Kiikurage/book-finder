@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+*.tmp
+*.log
+node_modules
+build
+__pycache__
+output
+server/uploaded

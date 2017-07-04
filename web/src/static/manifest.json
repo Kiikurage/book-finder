@@ -1,0 +1,9 @@
+{
+	"short_name": "Book Finder",
+	"name": "Book Finder",
+	"display": "standalone",
+	"background_color": "#FF9900",
+	"theme_color": "#FF9900",
+	"start_url": "/index.html",
+	"icons": [ ]
+}
