@@ -4,14 +4,21 @@ import cv2
 from color_detect import color_detect
 from line_detect import line_detect, line_detect2
 from segmentation import segmentation
+import argparse
 
 def main():
-    target = './images/target5.jpg'
+    parser = argparse.ArgumentParser(description='detect book from target image')
+    parser.add_argument('book_image', type=str, help='path to the image of book')
+    parser.add_argument('bookshelf_image', type=str, help='path to the image of bookshelf')
 
-    book_img = cv2.imread('./images/0.jpg', 1)
-    target_img = cv2.imread(target, 1)
+    args = parser.parse_args()
+    print(args.book_image, args.bookshelf_image)
+
+    book_img = cv2.imread(args.book_image, 1)
+    target_img = cv2.imread(args.bookshelf_image, 1)
 
     mask_img, masked_target_img = color_detect(book_img, target_img)
+
     #masked_target_img = line_detect2(book_img, target_img, masked_target_img)
     masked_target_img, coord_list = line_detect(book_img, target_img, masked_target_img)
     sorted_index = np.argsort(coord_list[:, 0], axis=0)
@@ -61,7 +68,7 @@ def main():
     cv2.imshow("segmented_image", resized_dst2)
 
     cv2.waitKey(0)
-    cv2.imwrite("target5.jpg", resized_origin)
+    #cv2.imwrite("target5.jpg", resized_origin)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
