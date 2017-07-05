@@ -1,64 +1,36 @@
-#coding: utf-8
-import numpy as np
+# coding: utf-8
 import cv2
+import numpy as np
+from PIL import ImageFilter, Image
+
 
 def color_detect(book_img, target_img):
 
+    # HSV色空間に変換
     target_img_hsv = cv2.cvtColor(target_img, cv2.COLOR_BGR2HSV)
-    height = len(book_img)
-    width = len(book_img[0])
-    channels = len(book_img[0][0])
+    book_img_hsv = cv2.cvtColor(book_img, cv2.COLOR_BGR2HSV)
 
-    #左端のみ切り取り
-    book_img_leftside = book_img[:, 0:int(width/10), :]
-    #HSV色空間に変換
-    book_img_leftside = cv2.cvtColor(book_img_leftside, cv2.COLOR_BGR2HSV)
+    # 色の平均値の計算
+    average_color = np.sum(book_img_hsv, axis=(0, 1)) / (book_img_hsv.shape[0] * book_img_hsv.shape[1])
+    print(average_color)
+    # mask画像の作成: 条件=h(色相)が範囲内
+    threshold = 5
+    mask_img = np.abs(target_img_hsv[:, :, 0] - average_color[0]) < 5
+    mask_img = np.bitwise_and(mask_img, np.abs(target_img_hsv[:, :, 1] - average_color[1]) < 50)
+    mask_img = np.bitwise_and(mask_img, np.abs(target_img_hsv[:, :, 2] - average_color[2]) < 50)
+    # cv2.imwrite("./tmp.jpg", mask_img.astype(np.uint8) * 255)
 
-    #色の平均値の計算
-    average_color = np.zeros((3, )).astype(np.uint8)
-    for channel in range(channels):
-        average_color[channel] = np.sum(book_img_leftside[:, :, channel]) / (height * int(width / 10))
+    # 縮小処理でノイズ除去
+    mask_img = Image.fromarray(mask_img.astype(np.uint8))
+    mask_img = mask_img.filter(ImageFilter.MinFilter(size=9))
+    mask_img = mask_img.filter(ImageFilter.MaxFilter(size=9))
+    mask_img = np.array(mask_img)
+    cv2.imwrite("./color_mask.jpg", mask_img.astype(np.uint8) * 255)
+    # cv2.imwrite("./tmp.jpg", mask_img.astype(np.uint8) * 255)
 
-    #mask画像の作成
-    alpha = 5
-    mask_img1 = np.ones(target_img_hsv[:, :, 0].shape) * (average_color[0] - alpha) < target_img_hsv[:, :, 0]
-    mask_img2 = target_img_hsv[:, :, 0] < np.ones(target_img_hsv[:, :, 0].shape) * (average_color[0] + alpha)
-    mask_img = (mask_img1 * mask_img2).astype(np.uint8) * 255
+    # target画像にmask画像をかける
+    masked_target_img = target_img * mask_img[:, :, None]
+    cv2.imwrite("./color_masked.jpg", masked_target_img.astype(np.uint8))
+    # exit(0)
 
-    # 8近傍の定義
-    neiborhood8 = np.array([[1, 1, 1],
-                            [1, 1, 1],
-                            [1, 1, 1]],
-                            np.uint8)
-
-    # 8近傍で縮小処理
-    mask_img = cv2.erode(mask_img, neiborhood8, iterations=5)
-    mask_img = cv2.dilate(mask_img, neiborhood8, iterations=5)
-
-    #target画像にmask画像をかける
-    masked_target_img = np.zeros(target_img.shape).astype(np.uint8)
-    for channel in range(channels):
-        masked_target_img[:, :, channel] = ((target_img[:, :, channel] * ((mask_img == 255).astype(np.uint8))))
-
-    return (mask_img, masked_target_img)
-
-#探したい本の表紙画像を読み込み
-def main():
-    book_img = cv2.imread('./images/0.jpg', 1)
-    target_img = cv2.imread('./images/target5.jpg', 1)
-
-    mask_img, masked_target_img = color_detect(book_img, target_img)
-
-    #画像の表示
-    resized_origin = cv2.resize(masked_target_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
-    resized_dst = cv2.resize(mask_img, (int(mask_img.shape[0]/3), int(mask_img.shape[1]/3)))
-    cv2.namedWindow("original_image", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("mask_image", cv2.WINDOW_NORMAL)
-    cv2.imshow("original_image", resized_origin)
-    cv2.imshow("mask_image", resized_dst)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    main()
+    return mask_img, masked_target_img
